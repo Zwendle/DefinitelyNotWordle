@@ -35,4 +35,15 @@ export default class GameController {
       next(error);
     }
   }
+
+  static async getStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sessionId = req.session.id;
+      const user = await GamesService.getOrCreateUser(sessionId);
+      const stats = await GamesService.getStats(user.id);
+      res.json(stats);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

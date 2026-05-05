@@ -131,4 +131,64 @@ export default class GamesService {
       status: won ? "WON" : lost ? "LOST" : "IN_PROGRESS",
     };
   }
+
+  static async getStats(userId: string) {
+    const sessions = await prisma.gameSession.findMany({
+      where: { userId, status: { not: "IN_PROGRESS" } },
+      include: { guesses: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const totalGames = sessions.length;
+    const wins = sessions.filter((s) => s.status === "WON");
+    const winPercentage =
+      totalGames === 0 ? 0 : Math.round((wins.length / totalGames) * 100);
+
+    // Guess distribution (how many games won in 1, 2, 3, 4, 5, 6 guesses)
+    const distribution: Record<number, number> = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+    };
+
+    for (const win of wins) {
+      const guessCount = win.guesses.length;
+      if (guessCount >= 1 && guessCount <= 6) {
+        distribution[guessCount]!++;
+      }
+    }
+
+    // Current streak
+    let currentStreak = 0;
+    for (const session of sessions) {
+      if (session.status === "WON") {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    // Max streak
+    let maxStreak = 0;
+    let runningStreak = 0;
+    for (const session of [...sessions].reverse()) {
+      if (session.status === "WON") {
+        runningStreak++;
+        maxStreak = Math.max(maxStreak, runningStreak);
+      } else {
+        runningStreak = 0;
+      }
+    }
+
+    return {
+      totalGames,
+      winPercentage,
+      currentStreak,
+      maxStreak,
+      distribution,
+    };
+  }
 }

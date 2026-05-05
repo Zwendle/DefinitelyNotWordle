@@ -7,4 +7,6 @@ gameRouter.get("/today", GameController.getTodayGame);
 
 gameRouter.post("/guess", GameController.postGuess);
 
+gameRouter.get("/stats", GameController.getStats);
+
 export default gameRouter;
