@@ -10,11 +10,14 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding word list...");
+  console.log("Looking for words.txt at:", join(__dirname, "words.txt"));
 
   const words = readFileSync(join(__dirname, "words.txt"), "utf-8")
     .split("\n")
     .map((w) => w.trim())
     .filter((w) => w.length === 5);
+
+  console.log(`Found ${words.length} words`);
 
   await prisma.word.createMany({
     data: words.map((word: string, index: number) => ({

@@ -4,7 +4,7 @@ A full-stack Wordle clone built with React, TypeScript, Express, and PostgreSQL.
 
 ## Live Demo
 
-🚧 Coming soon
+https://definitely-not-wordle-xi.vercel.app/
 
 ## Tech Stack
 

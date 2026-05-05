@@ -12,6 +12,9 @@
     "prisma:studio": "npx prisma studio",
     "prisma:seed": "tsx prisma/seed.ts"
   },
+  "prisma": {
+    "seed:": "tsx prisma/seed.ts"
+  },
   "author": "Zachary Wen",
   "license": "ISC",
   "dependencies": {
