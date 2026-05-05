@@ -10,6 +10,7 @@ import connectPgSimple from "connect-pg-simple";
 import gameRouter from "./routes/games.routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 const PgStore = connectPgSimple(session);
 const port = 3000;
 
