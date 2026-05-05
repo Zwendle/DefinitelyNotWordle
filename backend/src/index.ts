@@ -37,7 +37,12 @@ app.use(
     secret: sessionSecret,
     resave: false,
     saveUninitialized: true, // set to true to create session for every user, even if they don't log in; temporary change
-    cookie: { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 },
+    cookie: {
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    },
   }),
 );
 
