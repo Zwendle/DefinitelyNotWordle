@@ -12,7 +12,7 @@ export default class GameController {
         sessionId: game.id,
         status: game.status,
         guesses: game.guesses,
-        word: game.status === 'LOST' ? game.word.word : undefined,
+        word: game.status === "LOST" ? game.word.word : undefined,
       });
     } catch (error) {
       next(error);
@@ -33,7 +33,11 @@ export default class GameController {
       const result = await GamesService.postGuess(user.id, guess);
       res.json(result);
     } catch (error) {
-      next(error);
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        next(error);
+      }
     }
   }
 
