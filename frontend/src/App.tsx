@@ -1,122 +1,122 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useCallback, useState } from "react";
+import useGame from "./hooks/useGame";
+import Board from "./components/board/Board";
+import Keyboard from "./components/keyboard/Keyboard";
+import StatsModal from "./components/modal/StatsModal";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const {
+    session,
+    currentGuess,
+    error,
+    isLoading,
+    letterStates,
+    addLetter,
+    deleteLetter,
+    submitGuess,
+    fetchStats,
+    stats,
+  } = useGame();
+
+  const [showStats, setShowStats] = useState(false);
+
+  // Physical keyboard support
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      if (e.key === "Enter") {
+        submitGuess();
+      } else if (e.key === "Backspace") {
+        deleteLetter();
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        addLetter(e.key.toUpperCase());
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [submitGuess, deleteLetter, addLetter]);
+
+  // Auto-show stats when game ends
+  useEffect(() => {
+    if (session?.status === "WON" || session?.status === "LOST") {
+      fetchStats();
+      setTimeout(() => setShowStats(true), 1500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.status]);
+
+  const handleStatsOpen = useCallback(() => {
+    fetchStats();
+    setShowStats(true);
+  }, [fetchStats]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-neutral-900">
+        <p className="text-white text-lg">Loading...</p>
+      </main>
+    );
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <main className="min-h-screen flex flex-col items-center bg-neutral-900 text-white">
+      {/* Header */}
+      <header className="w-full max-w-lg flex items-center justify-between px-4 py-4 border-b border-neutral-700">
+        <h1 className="text-2xl font-bold tracking-widest uppercase">
+          DefinitelyNotWordle
+        </h1>
         <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={handleStatsOpen}
+          className="text-lg text-neutral-400 hover:text-white transition-colors"
         >
-          Count is {count}
+          Stats
         </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Error banner */}
+      {error && (
+        <div className="mt-4 px-4 py-2 bg-red-800 text-white rounded text-sm">
+          {error}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Game over message */}
+      {session?.status === "WON" && (
+        <div className="mt-4 px-4 py-2 bg-green-700 text-white rounded text-sm font-bold">
+          Nice job!
+        </div>
+      )}
+      {session?.status === "LOST" && (
+        <div className="mt-4 px-4 py-2 bg-red-700 text-white rounded text-sm font-bold">
+          Better luck tomorrow! The word was {session.word?.toUpperCase()}
+        </div>
+      )}
+
+      {/* Board */}
+      <div className="flex grow items-center justify-center py-8">
+        <Board
+          guesses={session?.guesses ?? []}
+          currentGuess={currentGuess}
+          gameStatus={session?.status ?? "IN_PROGRESS"}
+        />
+      </div>
+
+      {/* Keyboard */}
+      <div className="w-full max-w-lg px-2 pb-8">
+        <Keyboard
+          letterStates={letterStates}
+          onLetter={addLetter}
+          onEnter={submitGuess}
+          onDelete={deleteLetter}
+        />
+      </div>
+
+      {/* Stats modal */}
+      {showStats && stats && (
+        <StatsModal stats={stats} onClose={() => setShowStats(false)} />
+      )}
+    </main>
+  );
 }
-
-export default App

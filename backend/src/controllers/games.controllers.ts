@@ -12,6 +12,7 @@ export default class GameController {
         sessionId: game.id,
         status: game.status,
         guesses: game.guesses,
+        word: game.status === 'LOST' ? game.word.word : undefined,
       });
     } catch (error) {
       next(error);

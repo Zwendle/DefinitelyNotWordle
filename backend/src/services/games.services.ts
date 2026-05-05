@@ -4,7 +4,7 @@ type LetterResult = "correct" | "present" | "absent";
 
 export default class GamesService {
   static getTodayWordIndex(): number {
-    const launch = new Date("2026-01-01");
+    const launch = new Date("2025-01-01");
     const today = new Date();
     const diff = Math.floor(
       (today.getTime() - launch.getTime()) / (1000 * 60 * 60 * 24),
@@ -53,7 +53,7 @@ export default class GamesService {
         userId,
         createdAt: { gte: startOfDay, lte: endOfDay },
       },
-      include: { guesses: { orderBy: { guessNumber: "asc" } } },
+      include: { guesses: { orderBy: { guessNumber: "asc" } }, word: true },
     });
 
     if (existingSession) return existingSession;
@@ -65,7 +65,7 @@ export default class GamesService {
 
     return prisma.gameSession.create({
       data: { userId, wordId: word.id },
-      include: { guesses: true },
+      include: { guesses: true, word: true },
     });
   }
 
