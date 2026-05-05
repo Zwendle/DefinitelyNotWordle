@@ -17,4 +17,22 @@ export default class GameController {
       next(error);
     }
   }
+
+  static async postGuess(req: Request, res: Response, next: NextFunction) {
+    try {
+      const sessionId = req.session.id;
+      const user = await GamesService.getOrCreateUser(sessionId);
+      const { guess } = req.body;
+
+      if (!guess) {
+        res.status(400).json({ message: "Guess is required" });
+        return;
+      }
+
+      const result = await GamesService.postGuess(user.id, guess);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

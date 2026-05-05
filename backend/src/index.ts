@@ -1,5 +1,9 @@
 import "dotenv/config";
-import express, { type Request, type Response } from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import cors from "cors";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
@@ -31,6 +35,11 @@ app.use(
     cookie: { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 },
   }),
 );
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.message);
+  res.status(500).json({ message: err.message });
+});
 
 app.use("/game", gameRouter);
 
