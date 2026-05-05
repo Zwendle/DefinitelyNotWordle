@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String        @id @default(uuid())
+  sessionId String        @unique
+  createdAt DateTime      @default(now())
+  sessions  GameSession[]
+}
+
+model Word {
+  id       String        @id @default(uuid())
+  word     String        @unique
+  index    Int           @unique
+  sessions GameSession[]
+}
+
+model GameSession {
+  id        String     @id @default(uuid())
+  userId    String
+  wordId    String
+  status    GameStatus @default(IN_PROGRESS)
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  word      Word       @relation(fields: [wordId], references: [id])
+  guesses   Guess[]
+}
+
+model Guess {
+  id            String      @id @default(uuid())
+  gameSessionId String
+  guessNumber   Int
+  word          String
+  result        Json
+  gameSession   GameSession @relation(fields: [gameSessionId], references: [id])
+}
+
+enum GameStatus {
+  IN_PROGRESS
+  WON
+  LOST
+}
